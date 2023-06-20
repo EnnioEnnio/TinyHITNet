@@ -39,10 +39,14 @@ def predict(model, lp, rp, width, op):
     pred = model(left, right)
 
     disp = pred["disp"]
-    disp = torch.clip(disp / 192 * 255, 0, 255).long()
-    disp = apply_colormap(disp)
+    disp = torch.clip(disp.float() / 192.0, 0, 1)
 
-    output = [left, disp]
+    # disp = torch.clip(disp / 192 * 255, 0, 255).long()
+    # disp = apply_colormap(disp)
+    # torchvision.transforms.functional.to_tensor(disp)
+    # output = [left, disp]
+    output = [disp]
+
     if "slant" in pred:
         dxy = dxy_colormap(pred["slant"][-1][1])
         output.append(dxy)

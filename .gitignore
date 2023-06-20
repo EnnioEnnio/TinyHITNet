@@ -248,3 +248,6 @@ data/
 lightning_logs/
 example/init_result
 logs/
+
+es_HITNet.sh
+images/*

@@ -38,22 +38,32 @@ def predict(model, lp, rp, width, op):
     right = np2torch(right, bgr=True).cuda().unsqueeze(0)
     pred = model(left, right)
 
+    """original code commented below
+    For using HitNet depth in EndoNeRF project results other than 
+    color depth map gets discarded and color map application is bypassed
+    depending on HitnetXL or Stereo net different results get produced and 
+    thus require different processing"""
     disp = pred["disp"]
     disp = torch.clip(disp.float() / 192.0, 0, 1)
 
-    # disp = torch.clip(disp / 192 * 255, 0, 255).long()
-    # disp = apply_colormap(disp)
-    # torchvision.transforms.functional.to_tensor(disp)
-    # output = [left, disp]
     output = [disp]
-
-    if "slant" in pred:
-        dxy = dxy_colormap(pred["slant"][-1][1])
-        output.append(dxy)
-
     output = torch.cat(output, dim=0)
     torchvision.utils.save_image(output, op, nrow=1)
     return
+
+    # disp = pred["disp"]
+    # disp = torch.clip(disp.float() / 192.0, 0, 1) # use w/o colormap
+    # disp = torch.clip(disp / 192 * 255, 0, 255).long() # use w colormap
+    # disp = apply_colormap(disp) # colormap application
+    # torchvision.transforms.functional.to_tensor(disp)
+    # output = [left, disp] # result is original image together with depthmap 
+    # # HitNetXL_SF models produce "slant" image StereoNet doesn't
+    # if "slant" in pred:
+    #     dxy = dxy_colormap(pred["slant"][-1][1])
+    #     output.append(dxy)
+    # output = torch.cat(output, dim=0)
+    # torchvision.utils.save_image(output, op, nrow=1)
+    # return
 
 
 if __name__ == "__main__":
